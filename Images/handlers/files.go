@@ -7,7 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/ancalabrese/MicService/Images/file"
+	"github.com/ancalabrese/EXPerimenta/GoMic/Images/file"
 
 	"github.com/hashicorp/go-hclog"
 )

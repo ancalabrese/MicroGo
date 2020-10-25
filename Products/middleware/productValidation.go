@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/ancalabrese/MicService/Products/data"
+	"github.com/ancalabrese/EXPerimenta/GoMic/Products/data"
 )
 
 //ProductKey to retrieve the product in  the body request

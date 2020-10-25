@@ -1,4 +1,4 @@
-module github.com/ancalabrese/MicService/Images
+module github.com/ancalabrese/EXPerimenta/GoMic/Images
 
 go 1.15
 

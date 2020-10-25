@@ -8,8 +8,8 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/ancalabrese/MicService/Products/handlers"
-	"github.com/ancalabrese/MicService/Products/middleware"
+	"github.com/ancalabrese/EXPerimenta/GoMic/Products/handlers"
+	"github.com/ancalabrese/EXPerimenta/GoMic/Products/middleware"
 	gorillaHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )

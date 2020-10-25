@@ -1,0 +1,15 @@
+syntax= "proto3"; 
+
+service Currency {
+    rpc GetRate(RateRquest) returns (RateResponse);
+}
+
+message RateRquest {
+    string Base =1;
+    string Destination=2;
+}
+
+message RateResponse {
+    float Rate = 1; 
+}
+

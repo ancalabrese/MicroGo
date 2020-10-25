@@ -6,12 +6,11 @@ import (
 	"os"
 	"os/signal"
 	"time"
+	"github.com/ancalabrese/EXPerimenta/GoMic/Images/middleware"
 
-	"github.com/ancalabrese/MicService/Images/middleware"
+	"github.com/ancalabrese/EXPerimenta/GoMic/Images/file"
 
-	"github.com/ancalabrese/MicService/Images/file"
-
-	"github.com/ancalabrese/MicService/Images/handlers"
+	"github.com/ancalabrese/EXPerimenta/GoMic/Images/handlers"
 	gorillaHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/hashicorp/go-hclog"
@@ -68,7 +67,7 @@ func main() {
 	}
 
 	go func() {
-		l.Info("Starting server, bind address", bindAddress)
+		l.Info("Starting server...", "Binding addres", bindAddress)
 		err := s.ListenAndServe()
 		if err != nil {
 			l.Error("Couldn't Start the server: ", err)
@@ -82,7 +81,7 @@ func main() {
 
 	//Block until signal is received
 	sig := <-c
-	l.Info("Shutting down server with signal", sig)
+	l.Info("Shutting down server with signal", "sig", sig)
 	//Gracefully shutdown server
 	context.WithTimeout(context.Background(), 30*time.Second)
 }
