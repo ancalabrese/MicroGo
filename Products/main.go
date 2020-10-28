@@ -8,6 +8,8 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/ancalabrese/EXPerimenta/GoMic/Currency"
+	"github.com/ancalabrese/EXPerimenta/GoMic/Images"
 	"github.com/ancalabrese/EXPerimenta/GoMic/Products/handlers"
 	"github.com/ancalabrese/EXPerimenta/GoMic/Products/middleware"
 	gorillaHandlers "github.com/gorilla/handlers"
