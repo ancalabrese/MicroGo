@@ -1,4 +1,4 @@
-module github.com/ancalabrese/EXPerimenta/GoMic/Products
+module github.com/ancalabrese/MicroGo/Products
 
 go 1.15
 

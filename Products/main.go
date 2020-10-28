@@ -8,10 +8,10 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/ancalabrese/EXPerimenta/GoMic/Currency"
-	"github.com/ancalabrese/EXPerimenta/GoMic/Images"
-	"github.com/ancalabrese/EXPerimenta/GoMic/Products/handlers"
-	"github.com/ancalabrese/EXPerimenta/GoMic/Products/middleware"
+	"github.com/ancalabrese/MicroGo/Currency"
+	"github.com/ancalabrese/MicroGo/Images"
+	"github.com/ancalabrese/MicroGo/Products/handlers"
+	"github.com/ancalabrese/MicroGo/Products/middleware"
 	gorillaHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )

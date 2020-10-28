@@ -1,4 +1,4 @@
-module github.com/ancalabrese/EXPerimenta/GoMic/Currency
+module github.com/ancalabrese/MicroGo/Currency
 
 go 1.15
 

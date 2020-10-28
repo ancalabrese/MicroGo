@@ -23,8 +23,8 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/ancalabrese/EXPerimenta/GoMic/Products/data"
-	"github.com/ancalabrese/EXPerimenta/GoMic/Products/middleware"
+	"github.com/ancalabrese/MicroGo/Products/data"
+	"github.com/ancalabrese/MicroGo/Products/middleware"
 )
 
 // A list of products in the API response

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	model "github.com/ancalabrese/EXPerimenta/GoMic/Currency/data/model"
+	model "github.com/ancalabrese/MicroGo/Currency/data/model"
 	"github.com/hashicorp/go-hclog"
 )
 

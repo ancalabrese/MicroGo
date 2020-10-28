@@ -7,11 +7,11 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/ancalabrese/EXPerimenta/GoMic/Images/middleware"
+	"github.com/ancalabrese/MicroGo/Images/middleware"
 
-	"github.com/ancalabrese/EXPerimenta/GoMic/Images/file"
+	"github.com/ancalabrese/MicroGo/Images/file"
 
-	"github.com/ancalabrese/EXPerimenta/GoMic/Images/handlers"
+	"github.com/ancalabrese/MicroGo/Images/handlers"
 	gorillaHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/hashicorp/go-hclog"
