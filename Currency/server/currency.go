@@ -17,7 +17,7 @@ func NewCurrencyServer(l hclog.Logger) *Currency {
 }
 
 //GetRate returns the current rate for the requested currency
-func (c *Currency) ConvertPrice(ctx context.Context, rr *protos.RateRquest) (*protos.RateResponse, error) {
+func (c *Currency) GetRate(ctx context.Context, rr *protos.RateRquest) (*protos.RateResponse, error) {
 	c.log.Info("Handle GetRate", "base", rr.GetBase(), "destination", rr.GetDestination())
 	return &protos.RateResponse{Rate: 0.5}, nil
 }
