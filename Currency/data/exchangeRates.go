@@ -27,7 +27,7 @@ func NewExchangeRate(l hclog.Logger) (*ExchangeRate, error) {
 	er.log.Info("Request new rates", "last Update", er.rates.Date)
 	er.lock.Lock()
 	defer er.lock.Unlock()
-	er := &ExchangeRate{log: l, rates: model.Rates{}}
+	er = &ExchangeRate{log: l, rates: model.Rates{}}
 	err := er.getCurrentRates()
 	if err != nil {
 		return er, err
