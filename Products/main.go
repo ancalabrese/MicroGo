@@ -18,6 +18,8 @@ func main() {
 	l := log.New(os.Stdout, "product-api", log.LstdFlags)
 	ph := handlers.NewProducts(l)
 
+	//CurrecyServer client
+	grpc.Dial()
 	//main product router
 	r := mux.NewRouter()
 	productsRouter := r.NewRoute().PathPrefix("/products").Subrouter()

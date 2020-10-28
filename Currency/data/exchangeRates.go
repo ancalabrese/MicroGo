@@ -50,8 +50,3 @@ func (er *ExchangeRate) getCurrentRates() error {
 	er.log.Debug("Got currencies", er.rates)
 	return nil
 }
-
-// func (er *ExchangeRate) fromJson( r io.Reader) {
-// 	dec := json.NewDecoder(r)
-// 	dec.
-// }
