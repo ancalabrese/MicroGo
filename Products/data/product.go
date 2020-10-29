@@ -54,8 +54,15 @@ func (p *Product) Validate() error {
 	return validate.Struct(p)
 }
 
-func GetProducts() Products {
-	return products
+//GetProducts return every product in the data base
+func GetProducts() *Products {
+	return &products
+}
+
+//GetProduct returns the position of the product if found
+func GetProduct(id int) (*Product,int, error) {
+	p, pos, err := findProductById(id)
+	return p, pos, err
 }
 
 func AddProducts(p Products) {
@@ -78,6 +85,11 @@ func UpdateProduct(id int, newProduct *Product) error {
 	newProduct.ID = id
 	products[pos] = newProduct
 	return nil
+}
+
+func (p *Product) ToJSON(w io.Writer) error {
+	prods := Products{p}
+	return prods.ToJSON(w)
 }
 
 func (p *Products) ToJSON(w io.Writer) error {

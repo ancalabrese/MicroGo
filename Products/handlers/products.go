@@ -18,13 +18,12 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"regexp"
 	"strconv"
 
-	"github.com/gorilla/mux"
-
+	proto "github.com/ancalabrese/MicroGo/Currency/protos/currency"
 	"github.com/ancalabrese/MicroGo/Products/data"
 	"github.com/ancalabrese/MicroGo/Products/middleware"
+	"github.com/gorilla/mux"
 )
 
 // A list of products in the API response
@@ -35,12 +34,13 @@ type productsReponse struct {
 }
 
 type Products struct {
-	l *log.Logger
+	l  *log.Logger
+	cc proto.CurrencyClient
 }
 
 //NewProducts returns a new instance of Products
-func NewProducts(l *log.Logger) *Products {
-	return &Products{l}
+func NewProducts(l *log.Logger, cc proto.CurrencyClient) *Products {
+	return &Products{l, cc}
 }
 
 // swagger: route GET /products prodects listProducts
@@ -58,6 +58,23 @@ func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//GetProduct returns a single product by its ID
+func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
+	id, err := getProductId(r)
+	if err != nil {
+		http.Error(rw, "Bad request", http.StatusBadRequest)
+		return
+	}
+	prod, _, err := data.GetProduct(id)
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusNotFound)
+	}
+	err = prod.ToJSON(rw)
+	if err != nil {
+		http.Error(rw, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
+	}
+}
+
 //AddProducts to the dataset
 func (p *Products) AddProducts(rw http.ResponseWriter, r *http.Request) {
 	prod := r.Context().Value(middleware.ProductKey{}).(data.Product)
@@ -67,8 +84,7 @@ func (p *Products) AddProducts(rw http.ResponseWriter, r *http.Request) {
 
 //UpdateProduct with new product passed in the reuqest body
 func (p Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
+	id, err := getProductId(r)
 	if err != nil {
 		http.Error(rw, "Bad request", http.StatusBadRequest)
 		return
@@ -87,17 +103,26 @@ func (p Products) operationNotSupported(rw http.ResponseWriter, r *http.Request)
 	http.Error(rw, "Method not supported", http.StatusMethodNotAllowed)
 }
 
-func (p *Products) grabURLProdID(url string) int {
-	reg := regexp.MustCompile(`/([0-9+])`)
-	subMatches := reg.FindAllStringSubmatch(url, -1)
-	if len(subMatches) == 0 || len(subMatches) > 1 || len(subMatches[0]) < 2 || len(subMatches[0]) > 2 {
-		p.l.Println("Invalid URL: (PUT) -> ", url)
-		return -1
-	}
-	id, err := strconv.Atoi(subMatches[0][1])
+func getProductId(r *http.Request) (int, error) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		p.l.Println("Invalid URL: (PUT) -> ", url)
-		return -1
+		return id, err
 	}
-	return id
+	return id, nil
 }
+
+// func (p *Products) grabURLProdID(url string) int {
+// 	reg := regexp.MustCompile(`/([0-9+])`)
+// 	subMatches := reg.FindAllStringSubmatch(url, -1)
+// 	if len(subMatches) == 0 || len(subMatches) > 1 || len(subMatches[0]) < 2 || len(subMatches[0]) > 2 {
+// 		p.l.Println("Invalid URL: (PUT) -> ", url)
+// 		return -1
+// 	}
+// 	id, err := strconv.Atoi(subMatches[0][1])
+// 	if err != nil {
+// 		p.l.Println("Invalid URL: (PUT) -> ", url)
+// 		return -1
+// 	}
+// 	return id
+// }

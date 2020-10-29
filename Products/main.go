@@ -8,20 +8,26 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/ancalabrese/MicroGo/Currency"
-	"github.com/ancalabrese/MicroGo/Images"
+	proto "github.com/ancalabrese/MicroGo/Currency/protos/currency"
 	"github.com/ancalabrese/MicroGo/Products/handlers"
 	"github.com/ancalabrese/MicroGo/Products/middleware"
 	gorillaHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"google.golang.org/grpc"
 )
 
 func main() {
 	l := log.New(os.Stdout, "product-api", log.LstdFlags)
-	ph := handlers.NewProducts(l)
 
 	//CurrecyServer client
-	
+	conn, err := grpc.Dial("localhost:9092", grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+	cc := proto.NewCurrencyClient(conn)
+
+	ph := handlers.NewProducts(l, cc)
 	//main product router
 	r := mux.NewRouter()
 	productsRouter := r.NewRoute().PathPrefix("/products").Subrouter()
@@ -31,6 +37,7 @@ func main() {
 	// Sub-router for each suppoprted method
 	getRouter := productsRouter.Methods(http.MethodGet).Subrouter()
 	getRouter.HandleFunc("", ph.GetProducts)
+	getRouter.HandleFunc("/{id:[0-9]+}", ph.GetProduct)
 
 	postRouter := productsRouter.Methods(http.MethodPost).Subrouter()
 	postRouter.Use(middleware.Validate)
@@ -39,12 +46,11 @@ func main() {
 	putRouter := productsRouter.Methods(http.MethodPut).Subrouter()
 	putRouter.Use(middleware.Validate)
 	putRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateProduct)
-	
 
 	// deleteRouter := productsRouter.Methods(http.MethodDelete).Subrouter()
 
 	//CORS
-	corsHandler:= gorillaHandlers.CORS(gorillaHandlers.AllowedOrigins([]string{"*"}))
+	corsHandler := gorillaHandlers.CORS(gorillaHandlers.AllowedOrigins([]string{"*"}))
 
 	s := &http.Server{
 		Addr:         ":9090",
