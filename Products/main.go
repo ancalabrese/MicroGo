@@ -69,6 +69,7 @@ func main() {
 	s := &http.Server{
 		Addr:         ":9090",
 		Handler:      corsHandler(r),
+		ErrorLog:     l.StandardLogger(&hclog.StandardLoggerOptions{}),
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  1 * time.Second,
 		WriteTimeout: 1 * time.Second,
