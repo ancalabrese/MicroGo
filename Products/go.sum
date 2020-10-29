@@ -1,6 +1,7 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/ancalabrese/MicroGo v0.0.0-20201028220250-059b37c5fa37 h1:Dhfl9uiwNncuD47Mn7cxEMUoaXoJJB3NMaS/B3jDSjw=
+github.com/ancalabrese/MicroGo v0.0.0-20201029123330-1d57bdea5b40 h1:d03sKpJZrM26NaZI2GSjD4G1ThgEwD4/zjHukLC4qIs=
 github.com/ancalabrese/MicroGo/Currency v0.0.0-20201028220250-059b37c5fa37 h1:CoPwdPHB4PQO/AmXManh215FXOCUGyf2GW1bNU+/sCo=
 github.com/ancalabrese/MicroGo/Currency v0.0.0-20201028220250-059b37c5fa37/go.mod h1:PInnnTR8k6X0mJ6pgHaVyFOoRrX2n7ORjPpwCaQzd1o=
 github.com/ancalabrese/MicroGo/Images v0.0.0-20201028220250-059b37c5fa37 h1:a3bGvzH+7th4b2qDH7i9vcPzhuyi+jhBscodBNbluRw=
