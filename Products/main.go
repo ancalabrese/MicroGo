@@ -58,6 +58,9 @@ func main() {
 	putRouter.Use(validator.Validate)
 	putRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateProduct)
 
+	deleteRouter := productsRouter.Methods(http.MethodDelete).Subrouter()
+	deleteRouter.HandleFunc("/{id:[0-9]+}", ph.DeleteProduct)
+
 	// deleteRouter := productsRouter.Methods(http.MethodDelete).Subrouter()
 
 	//CORS
