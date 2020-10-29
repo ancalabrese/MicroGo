@@ -2,9 +2,7 @@ package data
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
 	"regexp"
 	"time"
 
@@ -136,7 +134,6 @@ func (p *ProductsDB) UpdateProduct(id int, newProduct Product) error {
 	products[pos] = &newProduct
 	return nil
 }
-
 
 func getNextId() int {
 	return products[len(products)-1].ID + 1

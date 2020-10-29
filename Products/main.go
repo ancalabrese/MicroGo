@@ -8,6 +8,9 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/ancalabrese/MicroGo/Products/data"
+	"github.com/hashicorp/go-hclog"
+
 	proto "github.com/ancalabrese/MicroGo/Currency/protos/currency"
 	"github.com/ancalabrese/MicroGo/Products/handlers"
 	"github.com/ancalabrese/MicroGo/Products/middleware"
@@ -17,7 +20,12 @@ import (
 )
 
 func main() {
-	l := log.New(os.Stdout, "product-api", log.LstdFlags)
+	l := hclog.New(&hclog.LoggerOptions{
+		Name:  "Products-API",
+		Level: hclog.LevelFromString("DEBUG"),
+	})
+
+	log.New(os.Stdout, "product-api", log.LstdFlags)
 
 	//CurrecyServer client
 	conn, err := grpc.Dial("localhost:9092", grpc.WithInsecure())
@@ -27,24 +35,27 @@ func main() {
 	defer conn.Close()
 	cc := proto.NewCurrencyClient(conn)
 
-	ph := handlers.NewProducts(l, cc)
+	pdb := data.NewProductsDB(l, cc)
+	ph := handlers.NewProducts(l, pdb)
+
 	//main product router
 	r := mux.NewRouter()
 	productsRouter := r.NewRoute().PathPrefix("/products").Subrouter()
 	middlewareLogger := middleware.NewLogger(l)
 	productsRouter.Use(middlewareLogger.LogIncomingReq)
 
+	validator := middleware.NewProductValidator(l)
 	// Sub-router for each suppoprted method
 	getRouter := productsRouter.Methods(http.MethodGet).Subrouter()
 	getRouter.HandleFunc("", ph.GetProducts)
 	getRouter.HandleFunc("/{id:[0-9]+}", ph.GetProduct)
 
 	postRouter := productsRouter.Methods(http.MethodPost).Subrouter()
-	postRouter.Use(middleware.Validate)
+	postRouter.Use(validator.Validate)
 	postRouter.HandleFunc("", ph.AddProducts)
 
 	putRouter := productsRouter.Methods(http.MethodPut).Subrouter()
-	putRouter.Use(middleware.Validate)
+	putRouter.Use(validator.Validate)
 	putRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateProduct)
 
 	// deleteRouter := productsRouter.Methods(http.MethodDelete).Subrouter()
@@ -63,7 +74,8 @@ func main() {
 	go func() {
 		err := s.ListenAndServe()
 		if err != nil {
-			l.Fatal(err)
+			l.Error("Error starting server", "error", err)
+			os.Exit(1)
 		}
 	}()
 
@@ -72,8 +84,8 @@ func main() {
 	signal.Notify(sigChan, os.Kill)
 
 	sig := <-sigChan
-	l.Println("Received terminate, grecefully shout down", sig)
+	log.Println("Got signal:", sig)
 
-	tc, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	s.Shutdown(tc)
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	s.Shutdown(ctx)
 }

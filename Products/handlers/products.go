@@ -16,12 +16,11 @@
 package handlers
 
 import (
-	"context"
-	"log"
 	"net/http"
 	"strconv"
 
-	proto "github.com/ancalabrese/MicroGo/Currency/protos/currency"
+	"github.com/hashicorp/go-hclog"
+
 	"github.com/ancalabrese/MicroGo/Products/data"
 	"github.com/ancalabrese/MicroGo/Products/middleware"
 	"github.com/gorilla/mux"
@@ -35,13 +34,13 @@ type productsReponse struct {
 }
 
 type Products struct {
-	l  *log.Logger
-	cc proto.CurrencyClient
+	l          hclog.Logger
+	productsDB *data.ProductsDB
 }
 
 //NewProducts returns a new instance of Products
-func NewProducts(l *log.Logger, cc proto.CurrencyClient) *Products {
-	return &Products{l, cc}
+func NewProducts(l hclog.Logger, pdb *data.ProductsDB) *Products {
+	return &Products{l, pdb}
 }
 
 // swagger: route GET /products prodects listProducts
@@ -51,20 +50,11 @@ func NewProducts(l *log.Logger, cc proto.CurrencyClient) *Products {
 
 //GetProducts return the products in the data store
 func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
-	products := data.GetProducts()
-
-	//Convert price before sending products back
-	rate, err := p.getCurecnyRate()
+	p.l.Debug("Get all records")
+	products, err := p.productsDB.GetProducts("")
+	err = data.ToJSON(products, rw)
 	if err != nil {
-		http.Error(rw, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	for _, p := range *products {
-		p.Price = p.Price * rate
-	}
-
-	err = products.ToJSON(rw)
-	if err != nil {
+		p.l.Error("Unable to serialise records", "error", err)
 		http.Error(rw, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -73,24 +63,19 @@ func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 //GetProduct returns a single product by its ID
 func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 	id, err := getProductId(r)
+	p.l.Debug("Get record", "id", id)
 	if err != nil {
+		p.l.Error("Cannot find record", "error", err)
 		http.Error(rw, "Bad request", http.StatusBadRequest)
 		return
 	}
-	prod, _, err := data.GetProduct(id)
+	prod, err := p.productsDB.GetProduct(id, "")
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusNotFound)
 	}
-	//Convert prica to local currency before sending back the product
-	//TODO: get rate and convert here
-	rate, err := p.getCurecnyRate()
+	err = data.ToJSON(prod, rw)
 	if err != nil {
-		http.Error(rw, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	prod.Price = prod.Price * rate
-	err = prod.ToJSON(rw)
-	if err != nil {
+		p.l.Error("Unable to serialise record", "error", err)
 		http.Error(rw, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -99,21 +84,25 @@ func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 //AddProducts to the dataset
 func (p *Products) AddProducts(rw http.ResponseWriter, r *http.Request) {
 	prod := r.Context().Value(middleware.ProductKey{}).(data.Product)
-	data.AddProduct(prod)
+	p.l.Debug("Add new record", "Product", prod)
+	p.productsDB.AddProduct(prod)
 	rw.WriteHeader(http.StatusOK)
 }
 
 //UpdateProduct with new product passed in the reuqest body
 func (p Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 	id, err := getProductId(r)
+	p.l.Debug("Update record", "id", id)
 	if err != nil {
+		p.l.Error("Cannot find record", "error", err)
 		http.Error(rw, "Bad request", http.StatusBadRequest)
 		return
 	}
 
 	prod := r.Context().Value(middleware.ProductKey{}).(data.Product)
-	e := data.UpdateProduct(id, &prod)
-	if e != nil {
+	err = p.productsDB.UpdateProduct(id, prod)
+	if err != nil {
+		p.l.Error("Cannot insert record", "error", err)
 		http.Error(rw, "Product not found", http.StatusBadRequest)
 		return
 	}
@@ -132,31 +121,3 @@ func getProductId(r *http.Request) (int, error) {
 	}
 	return id, nil
 }
-
-func (p *Products) getCurecnyRate() (float32, error) {
-	//Convert prica to local currency before sending back the product
-	rr := &proto.RateRquest{
-		Base:        proto.Currencies(proto.Currencies_value["EUR"]),
-		Destination: proto.Currencies(proto.Currencies_value["GBP"]),
-	}
-	resp, err := p.cc.GetRate(context.Background(), rr)
-	if err != nil {
-		p.l.Println("[ERROR] error getting new reate", err)
-	}
-	return resp.Rate, err
-}
-
-// func (p *Products) grabURLProdID(url string) int {
-// 	reg := regexp.MustCompile(`/([0-9+])`)
-// 	subMatches := reg.FindAllStringSubmatch(url, -1)
-// 	if len(subMatches) == 0 || len(subMatches) > 1 || len(subMatches[0]) < 2 || len(subMatches[0]) > 2 {
-// 		p.l.Println("Invalid URL: (PUT) -> ", url)
-// 		return -1
-// 	}
-// 	id, err := strconv.Atoi(subMatches[0][1])
-// 	if err != nil {
-// 		p.l.Println("Invalid URL: (PUT) -> ", url)
-// 		return -1
-// 	}
-// 	return id
-// }

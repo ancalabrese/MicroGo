@@ -12,5 +12,5 @@ func ToJSON(i interface{}, w io.Writer) error {
 
 func FromJSON(i interface{}, r io.Reader) error {
 	d := json.NewDecoder(r)
-	return d.Decode(r)
+	return d.Decode(i)
 }
