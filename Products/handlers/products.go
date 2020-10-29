@@ -16,6 +16,7 @@
 package handlers
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"strconv"
@@ -51,7 +52,18 @@ func NewProducts(l *log.Logger, cc proto.CurrencyClient) *Products {
 //GetProducts return the products in the data store
 func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 	products := data.GetProducts()
-	err := products.ToJSON(rw)
+
+	//Convert price before sending products back
+	rate, err := p.getCurecnyRate()
+	if err != nil {
+		http.Error(rw, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	for _, p := range *products {
+		p.Price = p.Price * rate
+	}
+
+	err = products.ToJSON(rw)
 	if err != nil {
 		http.Error(rw, "Internal server error", http.StatusInternalServerError)
 		return
@@ -69,9 +81,18 @@ func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusNotFound)
 	}
+	//Convert prica to local currency before sending back the product
+	//TODO: get rate and convert here
+	rate, err := p.getCurecnyRate()
+	if err != nil {
+		http.Error(rw, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	prod.Price = prod.Price * rate
 	err = prod.ToJSON(rw)
 	if err != nil {
 		http.Error(rw, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -110,6 +131,19 @@ func getProductId(r *http.Request) (int, error) {
 		return id, err
 	}
 	return id, nil
+}
+
+func (p *Products) getCurecnyRate() (float32, error) {
+	//Convert prica to local currency before sending back the product
+	rr := &proto.RateRquest{
+		Base:        proto.Currencies(proto.Currencies_value["EUR"]),
+		Destination: proto.Currencies(proto.Currencies_value["GBP"]),
+	}
+	resp, err := p.cc.GetRate(context.Background(), rr)
+	if err != nil {
+		p.l.Println("[ERROR] error getting new reate", err)
+	}
+	return resp.Rate, err
 }
 
 // func (p *Products) grabURLProdID(url string) int {

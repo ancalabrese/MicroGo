@@ -11,7 +11,7 @@ message RateRquest {
 }
 
 message RateResponse {
-    float Rate = 1; 
+    double Rate = 1; 
 }
 
 enum Currencies {

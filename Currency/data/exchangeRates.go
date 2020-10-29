@@ -18,21 +18,32 @@ type ExchangeRate struct {
 
 var er *ExchangeRate
 
-//Singleton
+//NewExchangeRate returns a new instance of Exchange rate. Sigleton
 func NewExchangeRate(l hclog.Logger) (*ExchangeRate, error) {
 	if er != nil && er.rates.Date == time.Now().Format("2020-10-26") {
 		er.log.Info("Using cached rates", "last Update", er.rates.Date)
 		return er, nil
 	}
-	er.log.Info("Request new rates", "last Update", er.rates.Date)
+	er = &ExchangeRate{log: l, rates: model.Rates{}}
+	er.log.Info("Requesting new rates")
 	er.lock.Lock()
 	defer er.lock.Unlock()
-	er = &ExchangeRate{log: l, rates: model.Rates{}}
 	err := er.getCurrentRates()
-	if err != nil {
-		return er, err
+	return er, err
+}
+
+//Get rate returns the ratio from base and destination rates for conversion between different currencies
+func (e *ExchangeRate) GetRate(base, destination string) (float64, error) {
+	br, ok := e.rates.Rates[base]
+	if !ok {
+		return br, fmt.Errorf("Rate nor found for currency %s", base)
 	}
-	return er, nil
+	dr, ok := e.rates.Rates[destination]
+	if !ok {
+		return dr, fmt.Errorf("Rate nor found for currency %s", destination)
+	}
+
+	return dr / br, nil
 }
 
 func (er *ExchangeRate) getCurrentRates() error {
@@ -47,6 +58,7 @@ func (er *ExchangeRate) getCurrentRates() error {
 		return fmt.Errorf("Request code returned %d", resp.StatusCode)
 	}
 	er.rates.FromJson(resp.Body)
-	er.log.Debug("Got currencies", er.rates)
+	er.rates.Rates["EUR"] = 1
+	er.log.Info("Got new currencies")
 	return nil
 }

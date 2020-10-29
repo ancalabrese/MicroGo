@@ -4,6 +4,8 @@ import (
 	"net"
 	"os"
 
+	"github.com/ancalabrese/MicroGo/Currency/data"
+
 	protos "github.com/ancalabrese/MicroGo/Currency/protos/currency"
 	"github.com/ancalabrese/MicroGo/Currency/server"
 	"github.com/hashicorp/go-hclog"
@@ -14,8 +16,14 @@ import (
 func main() {
 	log := hclog.Default()
 
+	rates, err := data.NewExchangeRate(log)
+	if err != nil {
+		log.Error("Unable to generate rates", "error", err)
+		os.Exit(1)
+	}
+
 	grpcs := grpc.NewServer()
-	cs := server.NewCurrencyServer(log)
+	cs := server.NewCurrencyServer(rates, log)
 
 	protos.RegisterCurrencyServer(grpcs, cs)
 
