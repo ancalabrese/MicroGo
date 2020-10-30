@@ -68,7 +68,7 @@ func main() {
 	// deleteRouter := productsRouter.Methods(http.MethodDelete).Subrouter()
 
 	//CORS
-	corsHandler := gorillaHandlers.CORS(gorillaHandlers.AllowedOrigins([]string{"*"}))
+	corsHandler := gorillaHandlers.CORS(gorillaHandlers.AllowedOrigins([]string{config.SeviceConfig.CORSAllowedOrigins}))
 
 	s := &http.Server{
 		Addr:         config.SeviceConfig.Url + ":" + config.SeviceConfig.Port,

@@ -10,10 +10,11 @@ import (
 
 type Configurations struct {
 	SeviceConfig struct {
-		ServerName  string `yaml:"name"`
-		Url         string `yaml:"url"`
-		Port        string `yaml:"port"`
-		ApiBasePath string `yaml:"api-base-path"`
+		ServerName         string `yaml:"name"`
+		Url                string `yaml:"url"`
+		Port               string `yaml:"port"`
+		ApiBasePath        string `yaml:"api-base-path"`
+		CORSAllowedOrigins string `yaml:"cors-allowed-origins"`
 	} `yaml:"server"`
 	GeneralConfig struct {
 		LogLevel string       `yaml:"logLevel"`

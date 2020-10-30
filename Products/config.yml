@@ -6,3 +6,4 @@ server:
   url: "localhost"
   port: "9090"
   api-base-path: "/products"  
+  cors-allowed-origins: "*"
