@@ -1,0 +1,8 @@
+logLevel: debug
+
+# server configuration
+server:
+  name: 'product-api'
+  url: "localhost"
+  port: "9090"
+  api-base-path: "/products"  

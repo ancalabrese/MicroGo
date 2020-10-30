@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/ancalabrese/MicroGo/Products/data"
+	settings "github.com/ancalabrese/MicroGo/Products/settings"
 	"github.com/hashicorp/go-hclog"
 
 	proto "github.com/ancalabrese/MicroGo/Currency/protos/currency"
@@ -20,12 +20,14 @@ import (
 )
 
 func main() {
-	l := hclog.New(&hclog.LoggerOptions{
-		Name:  "Products-API",
-		Level: hclog.LevelFromString("DEBUG"),
-	})
-
-	log.New(os.Stdout, "product-api", log.LstdFlags)
+	l := hclog.New(&hclog.LoggerOptions{})
+	//Load server config
+	config := settings.NewConfig(l)
+	err := config.Load("./config.yml")
+	if err != nil {
+		l.Error("Cannot load config", "Error", err)
+	}
+	l.SetLevel(hclog.LevelFromString(config.GeneralConfig.LogLevel))
 
 	//CurrecyServer client
 	conn, err := grpc.Dial("localhost:9092", grpc.WithInsecure())
@@ -40,7 +42,7 @@ func main() {
 
 	//main product router
 	r := mux.NewRouter()
-	productsRouter := r.NewRoute().PathPrefix("/products").Subrouter()
+	productsRouter := r.NewRoute().PathPrefix(config.SeviceConfig.ApiBasePath).Subrouter()
 	middlewareLogger := middleware.NewLogger(l)
 	productsRouter.Use(middlewareLogger.LogIncomingReq)
 
@@ -69,7 +71,7 @@ func main() {
 	corsHandler := gorillaHandlers.CORS(gorillaHandlers.AllowedOrigins([]string{"*"}))
 
 	s := &http.Server{
-		Addr:         ":9090",
+		Addr:         config.SeviceConfig.Url + ":" + config.SeviceConfig.Port,
 		Handler:      corsHandler(r),
 		ErrorLog:     l.StandardLogger(&hclog.StandardLoggerOptions{}),
 		IdleTimeout:  120 * time.Second,
@@ -78,11 +80,13 @@ func main() {
 	}
 
 	go func() {
+		l.Info("Starting server", "Address", s.Addr)
 		err := s.ListenAndServe()
 		if err != nil {
 			l.Error("Error starting server", "error", err)
 			os.Exit(1)
 		}
+
 	}()
 
 	sigChan := make(chan os.Signal)
@@ -90,7 +94,7 @@ func main() {
 	signal.Notify(sigChan, os.Kill)
 
 	sig := <-sigChan
-	log.Println("Got signal:", sig)
+	l.Info("Got system signal", "sig", sig)
 
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	s.Shutdown(ctx)
