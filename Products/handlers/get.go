@@ -14,7 +14,8 @@ import (
 func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 	p.l.Debug("Get all records")
 	rw.Header().Add("Content-Type", "application/json")
-	products, err := p.productsDB.GetProducts("")
+	currency := getCurrency(r.URL)
+	products, err := p.productsDB.GetProducts(currency)
 	err = data.ToJSON(products, rw)
 	if err != nil {
 		p.l.Error("Unable to serialise records", "error", err)
@@ -27,13 +28,14 @@ func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("Content-Type", "application/json")
 	id, err := getProductId(r)
+	currency := getCurrency(r.URL)
 	p.l.Debug("Get record", "id", id)
 	if err != nil {
 		p.l.Error("Cannot find record", "error", err)
 		http.Error(rw, "Bad request", http.StatusBadRequest)
 		return
 	}
-	prod, err := p.productsDB.GetProduct(id, "")
+	prod, err := p.productsDB.GetProduct(id, currency)
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusNotFound)
 	}

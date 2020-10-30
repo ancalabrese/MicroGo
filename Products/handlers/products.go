@@ -16,6 +16,7 @@
 package handlers
 
 import (
+	"net/url"
 	"net/http"
 	"strconv"
 
@@ -53,4 +54,8 @@ func getProductId(r *http.Request) (int, error) {
 		return id, err
 	}
 	return id, nil
+}
+
+func getCurrency(url *url.URL) string{
+	return url.Query().Get("currency")
 }

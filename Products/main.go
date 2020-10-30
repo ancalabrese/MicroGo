@@ -47,7 +47,9 @@ func main() {
 	validator := middleware.NewProductValidator(l)
 	// Sub-router for each suppoprted method
 	getRouter := productsRouter.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("", ph.GetProducts).Queries("currency", "{[A-Z]3")
 	getRouter.HandleFunc("", ph.GetProducts)
+	getRouter.HandleFunc("/{id:[0-9]+}", ph.GetProduct).Queries("currency", "{[A-Z]3")
 	getRouter.HandleFunc("/{id:[0-9]+}", ph.GetProduct)
 
 	postRouter := productsRouter.Methods(http.MethodPost).Subrouter()
