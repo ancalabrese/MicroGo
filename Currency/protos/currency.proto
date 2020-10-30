@@ -3,6 +3,7 @@ syntax= "proto3";
 
 service Currency {
     rpc GetRate(RateRquest) returns (RateResponse);
+    rpc GetCurrencies(CurrenciesRequest) returns (CurrenciesResponse);
 }
 
 message RateRquest {
@@ -12,6 +13,14 @@ message RateRquest {
 
 message RateResponse {
     double rate = 1; 
+}
+
+message CurrenciesRequest{
+
+}
+
+message CurrenciesResponse{
+    repeated Currencies currencies = 1;
 }
 
 enum Currencies {
