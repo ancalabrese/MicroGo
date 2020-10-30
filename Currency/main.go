@@ -22,8 +22,10 @@ func main() {
 		os.Exit(1)
 	}
 
+	cc := data.NewCurrencies(log)
+
 	grpcs := grpc.NewServer()
-	cs := server.NewCurrencyServer(rates, log)
+	cs := server.NewCurrencyServer(rates, cc, log)
 
 	protos.RegisterCurrencyServer(grpcs, cs)
 
