@@ -20,12 +20,14 @@ import (
 )
 
 func main() {
-	l := hclog.New(&hclog.LoggerOptions{})
+	l := hclog.New(&hclog.LoggerOptions{
+		Level: hclog.LevelFromString("Debug"),
+	})
 	//Load server config
 	config := settings.NewConfig(l)
-	err := config.Load("./config.yml")
+	err := config.Load("./configs.yml")
 	if err != nil {
-		l.Error("Cannot load config", "Error", err)
+		l.Debug("Defaults", "Addr", config.SeviceConfig.Url, "Port", config.SeviceConfig.Port, "Base Path", config.SeviceConfig.ApiBasePath)
 	}
 	l.SetLevel(hclog.LevelFromString(config.GeneralConfig.LogLevel))
 

@@ -25,6 +25,10 @@ type Configurations struct {
 func NewConfig(l hclog.Logger) *Configurations {
 	c := &Configurations{}
 	c.GeneralConfig.log = l
+	c.SeviceConfig.ServerName = "Product-Api"
+	c.SeviceConfig.Url = "localhost"
+	c.SeviceConfig.Port = "9090"
+	c.SeviceConfig.ApiBasePath = "/products"
 	return c
 }
 
@@ -32,14 +36,13 @@ func (c *Configurations) Load(filename string) error {
 	c.GeneralConfig.log.Info("Loading config", "config", filename)
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
-		c.GeneralConfig.log.Error("Can't load configurations", "error", err)
+		c.GeneralConfig.log.Error("Can't load configurations", "error", err, "setting up defaults", "")
 		return err
 	}
 
-	//No nested struct supported by YAML
 	err = yaml.Unmarshal(data, c)
 	if err != nil {
-		c.GeneralConfig.log.Error("Can't read  general configurations", "error", err)
+		c.GeneralConfig.log.Error("Can't read  general configurations", "error", err, "setting up defaults")
 		return err
 	}
 	return nil
