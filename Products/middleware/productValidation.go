@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/go-hclog"
 
 	data "github.com/ancalabrese/MicroGo/Products/data"
+	pdata "github.com/ancalabrese/MicroGo/Products/data/product"
 )
 
 //ProductKey to retrieve the product in  the body request
@@ -22,7 +23,7 @@ func NewProductValidator(l hclog.Logger) *Validator {
 //Validate casts the request argument in Product and validate object
 func (v *Validator) Validate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		prod := data.Product{}
+		prod := pdata.Product{}
 
 		e := data.FromJSON(&prod, r.Body)
 		if e != nil {

@@ -7,12 +7,14 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/ancalabrese/MicroGo/Products/data"
+	cdata "github.com/ancalabrese/MicroGo/Products/data/currency"
+	pdata "github.com/ancalabrese/MicroGo/Products/data/product"
 	settings "github.com/ancalabrese/MicroGo/Products/settings"
 	"github.com/hashicorp/go-hclog"
 
 	proto "github.com/ancalabrese/MicroGo/Currency/protos/currency"
-	"github.com/ancalabrese/MicroGo/Products/handlers"
+	cHandler "github.com/ancalabrese/MicroGo/Products/handlers/currencies"
+	pHandler "github.com/ancalabrese/MicroGo/Products/handlers/products"
 	"github.com/ancalabrese/MicroGo/Products/middleware"
 	gorillaHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -25,7 +27,7 @@ func main() {
 	})
 	//Load server config
 	config := settings.NewConfig(l)
-	err := config.Load("./configs.yml")
+	err := config.Load("./config.yml")
 	if err != nil {
 		l.Debug("Defaults", "Addr", config.SeviceConfig.Url, "Port", config.SeviceConfig.Port, "Base Path", config.SeviceConfig.ApiBasePath)
 	}
@@ -39,35 +41,46 @@ func main() {
 	defer conn.Close()
 	cc := proto.NewCurrencyClient(conn)
 
-	pdb := data.NewProductsDB(l, cc)
-	ph := handlers.NewProducts(l, pdb)
+	pdb := pdata.NewProductsDB(l, cc)
+	ph := pHandler.NewProducts(l, pdb)
 
-	//main product router
+	cdb := cdata.NewCurrencyDB(l, cc)
+	ch := cHandler.NewCurrencyH(l, cdb)
+
+	//main API router
 	r := mux.NewRouter()
-	productsRouter := r.NewRoute().PathPrefix(config.SeviceConfig.ApiBasePath).Subrouter()
+
+	//Products router
+	productsRouter := r.NewRoute().PathPrefix(config.SeviceConfig.ApiBasePath + "/products").Subrouter()
 	middlewareLogger := middleware.NewLogger(l)
 	productsRouter.Use(middlewareLogger.LogIncomingReq)
 
+	//Currency router
+	currencyRouter := r.NewRoute().PathPrefix(config.SeviceConfig.ApiBasePath + "/currencies").Subrouter()
+	currencyRouter.Use(middlewareLogger.LogIncomingReq)
+
 	validator := middleware.NewProductValidator(l)
-	// Sub-router for each suppoprted method
-	getRouter := productsRouter.Methods(http.MethodGet).Subrouter()
-	getRouter.HandleFunc("", ph.GetProducts).Queries("currency", "{[A-Z]3")
-	getRouter.HandleFunc("", ph.GetProducts)
-	getRouter.HandleFunc("/{id:[0-9]+}", ph.GetProduct).Queries("currency", "{[A-Z]3")
-	getRouter.HandleFunc("/{id:[0-9]+}", ph.GetProduct)
+	// Products: Sub-router for each suppoprted method
+	pGetRouter := productsRouter.Methods(http.MethodGet).Subrouter()
+	pGetRouter.HandleFunc("", ph.GetProducts).Queries("currency", "{[A-Z]3")
+	pGetRouter.HandleFunc("", ph.GetProducts)
+	pGetRouter.HandleFunc("/{id:[0-9]+}", ph.GetProduct).Queries("currency", "{[A-Z]3")
+	pGetRouter.HandleFunc("/{id:[0-9]+}", ph.GetProduct)
 
-	postRouter := productsRouter.Methods(http.MethodPost).Subrouter()
-	postRouter.Use(validator.Validate)
-	postRouter.HandleFunc("", ph.AddProducts)
+	pPostRouter := productsRouter.Methods(http.MethodPost).Subrouter()
+	pPostRouter.Use(validator.Validate)
+	pPostRouter.HandleFunc("", ph.AddProducts)
 
-	putRouter := productsRouter.Methods(http.MethodPut).Subrouter()
-	putRouter.Use(validator.Validate)
-	putRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateProduct)
+	pPutRouter := productsRouter.Methods(http.MethodPut).Subrouter()
+	pPutRouter.Use(validator.Validate)
+	pPutRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateProduct)
 
-	deleteRouter := productsRouter.Methods(http.MethodDelete).Subrouter()
-	deleteRouter.HandleFunc("/{id:[0-9]+}", ph.DeleteProduct)
+	pDeleteRouter := productsRouter.Methods(http.MethodDelete).Subrouter()
+	pDeleteRouter.HandleFunc("/{id:[0-9]+}", ph.DeleteProduct)
 
-	// deleteRouter := productsRouter.Methods(http.MethodDelete).Subrouter()
+	//Currencies: Sub-router for each supported methods
+	cGetRouter := currencyRouter.Methods(http.MethodGet).Subrouter()
+	cGetRouter.HandleFunc("", ch.GetCurrencies)
 
 	//CORS
 	corsHandler := gorillaHandlers.CORS(gorillaHandlers.AllowedOrigins([]string{config.SeviceConfig.CORSAllowedOrigins}))

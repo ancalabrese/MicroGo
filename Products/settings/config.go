@@ -10,11 +10,12 @@ import (
 
 type Configurations struct {
 	SeviceConfig struct {
-		ServerName         string `yaml:"name"`
-		Url                string `yaml:"url"`
-		Port               string `yaml:"port"`
-		ApiBasePath        string `yaml:"api-base-path"`
-		CORSAllowedOrigins string `yaml:"cors-allowed-origins"`
+		ServerName         string   `yaml:"name"`
+		Url                string   `yaml:"url"`
+		Port               string   `yaml:"port"`
+		ApiBasePath        string   `yaml:"api-base-path"`
+		CORSAllowedOrigins string   `yaml:"cors-allowed-origins"`
+		ApiRoutes          []string `yaml:"api-routes"`
 	} `yaml:"server"`
 	GeneralConfig struct {
 		LogLevel string       `yaml:"logLevel"`
@@ -28,7 +29,7 @@ func NewConfig(l hclog.Logger) *Configurations {
 	c.SeviceConfig.ServerName = "Product-Api"
 	c.SeviceConfig.Url = "localhost"
 	c.SeviceConfig.Port = "9090"
-	c.SeviceConfig.ApiBasePath = "/products"
+	c.SeviceConfig.ApiBasePath = "/"
 	return c
 }
 

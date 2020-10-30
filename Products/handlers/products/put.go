@@ -1,9 +1,9 @@
-package handlers
+package products
 
 import (
 	"net/http"
 
-	"github.com/ancalabrese/MicroGo/Products/data"
+	data "github.com/ancalabrese/MicroGo/Products/data/product"
 	"github.com/ancalabrese/MicroGo/Products/middleware"
 )
 

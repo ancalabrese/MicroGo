@@ -3,10 +3,13 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/ancalabrese/MicroGo v0.0.0-20201028220250-059b37c5fa37 h1:Dhfl9uiwNncuD47Mn7cxEMUoaXoJJB3NMaS/B3jDSjw=
 github.com/ancalabrese/MicroGo v0.0.0-20201029123330-1d57bdea5b40 h1:d03sKpJZrM26NaZI2GSjD4G1ThgEwD4/zjHukLC4qIs=
 github.com/ancalabrese/MicroGo v0.0.0-20201030105426-e9354c265711 h1:1e/sJImQuUO9o0uoN23ILeXpKc1B/VJtMjYa8jm3vOs=
+github.com/ancalabrese/MicroGo v0.0.0-20201030160554-6f03acd7af01 h1:vhHZFIqXigERbMaYzyNdtXJzl7lz69wx3rY0O7bzaoY=
 github.com/ancalabrese/MicroGo/Currency v0.0.0-20201028220250-059b37c5fa37 h1:CoPwdPHB4PQO/AmXManh215FXOCUGyf2GW1bNU+/sCo=
 github.com/ancalabrese/MicroGo/Currency v0.0.0-20201028220250-059b37c5fa37/go.mod h1:PInnnTR8k6X0mJ6pgHaVyFOoRrX2n7ORjPpwCaQzd1o=
 github.com/ancalabrese/MicroGo/Currency v0.0.0-20201029123330-1d57bdea5b40 h1:OgU6x/HnPgdF/YwR6opvGkuZj/jYcfc4FrZGh88HNtc=
 github.com/ancalabrese/MicroGo/Currency v0.0.0-20201029123330-1d57bdea5b40/go.mod h1:PInnnTR8k6X0mJ6pgHaVyFOoRrX2n7ORjPpwCaQzd1o=
+github.com/ancalabrese/MicroGo/Currency v0.0.0-20201030160554-6f03acd7af01 h1:gy0gRMkz9Gl8QdezQbtyBz5Zvw2yWfkh8IpDGbuHKwQ=
+github.com/ancalabrese/MicroGo/Currency v0.0.0-20201030160554-6f03acd7af01/go.mod h1:PInnnTR8k6X0mJ6pgHaVyFOoRrX2n7ORjPpwCaQzd1o=
 github.com/ancalabrese/MicroGo/Images v0.0.0-20201028220250-059b37c5fa37 h1:a3bGvzH+7th4b2qDH7i9vcPzhuyi+jhBscodBNbluRw=
 github.com/ancalabrese/MicroGo/Images v0.0.0-20201028220250-059b37c5fa37/go.mod h1:avEq2YVF6yQWlWEmdFe0njni6/6EZKBmTbCwgi1fxWg=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=

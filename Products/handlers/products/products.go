@@ -13,7 +13,7 @@
 // 	- application/json
 // swagger:meta
 
-package handlers
+package products
 
 import (
 	"net/url"
@@ -22,7 +22,7 @@ import (
 
 	"github.com/hashicorp/go-hclog"
 
-	"github.com/ancalabrese/MicroGo/Products/data"
+	data "github.com/ancalabrese/MicroGo/Products/data/product"
 	"github.com/gorilla/mux"
 )
 
