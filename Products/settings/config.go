@@ -2,6 +2,7 @@ package config
 
 import (
 	"io/ioutil"
+	"time"
 
 	"gopkg.in/yaml.v2"
 
@@ -10,12 +11,15 @@ import (
 
 type Configurations struct {
 	SeviceConfig struct {
-		ServerName         string   `yaml:"name"`
-		Url                string   `yaml:"url"`
-		Port               string   `yaml:"port"`
-		ApiBasePath        string   `yaml:"api-base-path"`
-		CORSAllowedOrigins string   `yaml:"cors-allowed-origins"`
-		ApiRoutes          []string `yaml:"api-routes"`
+		ServerName         string        `yaml:"name"`
+		Url                string        `yaml:"url"`
+		Port               string        `yaml:"port"`
+		ApiBasePath        string        `yaml:"api-base-path"`
+		CORSAllowedOrigins string        `yaml:"cors-allowed-origins"`
+		ApiRoutes          []string      `yaml:"api-routes"`
+		IdleTimeout        time.Duration `yaml:"idle-timeout"`
+		ReadTimeout        time.Duration `yaml:"read-timeout"`
+		WriteTimeout       time.Duration `yaml:"write-timeout"`
 	} `yaml:"server"`
 	GeneralConfig struct {
 		LogLevel string       `yaml:"logLevel"`
@@ -30,6 +34,9 @@ func NewConfig(l hclog.Logger) *Configurations {
 	c.SeviceConfig.Url = "localhost"
 	c.SeviceConfig.Port = "9090"
 	c.SeviceConfig.ApiBasePath = "/"
+	c.SeviceConfig.IdleTimeout = 120 * time.Second
+	c.SeviceConfig.WriteTimeout = 1 * time.Second
+	c.SeviceConfig.ReadTimeout = 1 * time.Second
 	return c
 }
 

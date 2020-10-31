@@ -48,6 +48,7 @@ func main() {
 	grpcC.WithDialOption(
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(callOtp...)))
+
 	err = grpcC.DialUp()
 	if err != nil {
 		panic(err)
@@ -103,9 +104,9 @@ func main() {
 		Addr:         config.SeviceConfig.Url + ":" + config.SeviceConfig.Port,
 		Handler:      corsHandler(r),
 		ErrorLog:     l.StandardLogger(&hclog.StandardLoggerOptions{}),
-		IdleTimeout:  120 * time.Second,
-		ReadTimeout:  1 * time.Second,
-		WriteTimeout: 1 * time.Second,
+		IdleTimeout:  config.SeviceConfig.IdleTimeout * time.Second,
+		ReadTimeout:  config.SeviceConfig.ReadTimeout * time.Second,
+		WriteTimeout: config.SeviceConfig.WriteTimeout * time.Second,
 	}
 
 	go func() {

@@ -1,10 +1,13 @@
 logLevel: debug
-
 # server configuration
+#Timeouts values in s
 server:
   name: 'product-api'
   url: "localhost"
   port: "9090"
-  api-base-path: "/api"  
+  api-base-path: "/api"
   cors-allowed-origins: "*"
   api-routes: ["/products","/currencies"]
+  idle-timeout: 120
+  read-timeout: 1
+  write-timeout: 1
