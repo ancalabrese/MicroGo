@@ -12,12 +12,14 @@ import (
 	proto "github.com/ancalabrese/MicroGo/Currency/protos/currency"
 	cdata "github.com/ancalabrese/MicroGo/Products/data/currency"
 	pdata "github.com/ancalabrese/MicroGo/Products/data/product"
+	"github.com/ancalabrese/MicroGo/Products/grpcClient"
 	cHandler "github.com/ancalabrese/MicroGo/Products/handlers/currencies"
 	pHandler "github.com/ancalabrese/MicroGo/Products/handlers/products"
 	"github.com/ancalabrese/MicroGo/Products/middleware"
 	settings "github.com/ancalabrese/MicroGo/Products/settings"
 	gorillaHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	"github.com/hashicorp/go-hclog"
 	"google.golang.org/grpc"
@@ -36,20 +38,22 @@ func main() {
 	l.SetLevel(hclog.LevelFromString(config.GeneralConfig.LogLevel))
 
 	//CurrecyServer client
+	//TODO: explore ways of logging retries
 	retryPolicy := grpc_retry.BackoffExponential(300 * time.Millisecond)
 	callOtp := []grpc_retry.CallOption{
 		grpc_retry.WithBackoff(retryPolicy),
 		grpc_retry.WithCodes(codes.NotFound, codes.Aborted),
 	}
-
-	conn, err := grpc.Dial("localhost:9092",
+	grpcC := grpcClient.NewClient(l, "localhost", "9092")
+	grpcC.WithDialOption(
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(callOtp...)))
+	err = grpcC.DialUp()
 	if err != nil {
 		panic(err)
 	}
-	defer conn.Close()
-	cc := proto.NewCurrencyClient(conn)
+	defer grpcC.Close()
+	cc := proto.NewCurrencyClient(grpcC.ClientConnection)
 
 	pdb := pdata.NewProductsDB(l, cc)
 	ph := pHandler.NewProducts(l, pdb)
