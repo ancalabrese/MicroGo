@@ -33,6 +33,6 @@ func (c *Client) WithDialOption(do ...grpc.DialOption) {
 }
 
 func (c *Client) Close() {
-	c.log.Info("Disconnecting from currency server")
+	c.log.Info("Disconnecting from grpc server")
 	c.ClientConnection.Close()
 }
