@@ -4,6 +4,7 @@ syntax= "proto3";
 service Currency {
     rpc GetRate(RateRquest) returns (RateResponse);
     rpc GetCurrencyCodes(CurrenciesRequest) returns (CurrenciesResponse);
+    rpc Subscribe(stream RateRquest) returns (stream RateResponse);
 }
 
 message RateRquest {
@@ -12,7 +13,9 @@ message RateRquest {
 }
 
 message RateResponse {
-    double rate = 1; 
+    Currencies Base=1;
+    Currencies Destination=2;
+    double Rate = 3; 
 }
 
 message CurrenciesRequest{
