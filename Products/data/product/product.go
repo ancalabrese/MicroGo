@@ -3,6 +3,7 @@ package product
 import (
 	"context"
 	"fmt"
+	"io"
 	"regexp"
 	"time"
 
@@ -52,10 +53,12 @@ type Products []*Product
 type ProductsDB struct {
 	log            hclog.Logger
 	currencyClient protos.CurrencyClient
+	rates          map[string]float64
+	rateSubClient  protos.Currency_SubscribeClient
 }
 
 func NewProductsDB(l hclog.Logger, cc protos.CurrencyClient) *ProductsDB {
-	return &ProductsDB{l, cc}
+	return &ProductsDB{l, cc, make(map[string]float64), nil}
 }
 
 func (p *Product) Validate() error {
@@ -96,6 +99,9 @@ func (p *ProductsDB) GetProduct(id int, currency string) (*Product, error) {
 		p.log.Error("Unable to get rate", "currency requested", currency, "error", err)
 		return nil, err
 	}
+	//update the cache 
+	p.rates[currency] = rate
+
 	return p.convertPrice(rate, pos), nil
 }
 
@@ -124,6 +130,7 @@ func (p *ProductsDB) AddProduct(pr Product) {
 	products = append(products, &pr)
 }
 
+//UpdateProduct updates the deatails about the specified product
 func (p *ProductsDB) UpdateProduct(id int, newProduct Product) error {
 	_, pos, err := findProductById(id)
 	if err != nil {
@@ -132,6 +139,33 @@ func (p *ProductsDB) UpdateProduct(id int, newProduct Product) error {
 	}
 	newProduct.ID = id
 	products[pos] = &newProduct
+	return nil
+}
+
+//SubscribeToRateChanges will subscribe to the currency server to update the currency value real-time.
+//Subsequent calls to GetProducts will have the most updated price conversion
+func (p *ProductsDB) SubscribeToRateChanges(currencyCode string) error {
+	if p.rateSubClient == nil {
+		sub, err := p.currencyClient.Subscribe(context.Background())
+		if err != nil {
+			p.log.Error("Unable to subscribe to currency server", "Currency requested", currencyCode, "error", err)
+			return err
+		}
+		p.rateSubClient = sub
+	}
+
+	rr := &protos.RateRequest{
+		Base:        protos.Currencies(protos.Currencies_value[currencyCode]),
+		Destination: protos.Currencies(protos.Currencies_value[currencyCode]),
+	}
+	err := p.rateSubClient.Send(rr)
+	if err == nil {
+		p.log.Error("Failed to stream message to server", "error", err)
+		return err
+	}
+	//TODO handle error from this goroutine
+	//handle server responses
+	go p.handleCurrencyUpdates()
 	return nil
 }
 
@@ -158,8 +192,13 @@ func validateSKU(f validator.FieldLevel) bool {
 	return true
 }
 
+//getRate returns the rate for the requested currency compared to EUROs
 func (p *ProductsDB) getRate(currency string) (float64, error) {
-	rr := &protos.RateRquest{
+	if c, isCached := p.rates[currency]; isCached {
+		return c, nil
+	}
+
+	rr := &protos.RateRequest{
 		Base:        protos.Currencies(protos.Currencies_value["EUR"]),
 		Destination: protos.Currencies(protos.Currencies_value[currency]),
 	}
@@ -171,4 +210,21 @@ func (p *ProductsDB) convertPrice(rate float64, index int) *Product {
 	np := *products[index]
 	np.Price = np.Price * rate
 	return &np
+}
+
+func (p *ProductsDB) handleCurrencyUpdates() error {
+	for {
+		rr, err := p.rateSubClient.Recv()
+		if err == io.EOF {
+			p.log.Info("Server closed connection")
+			break
+		} else if err != nil {
+			p.log.Error("Cannot read message from server", "error", err)
+			return err
+		}
+
+		p.log.Info("Updating cached currency", "currency", rr.Destination.String())
+		p.rates[rr.Destination.String()] = rr.Rate
+	}
+	return nil
 }

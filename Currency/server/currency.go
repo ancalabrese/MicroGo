@@ -15,12 +15,12 @@ type Currency struct {
 	log         hclog.Logger
 	rates       *data.ExchangeRate
 	codes       *data.Currencies
-	subscribers map[protos.Currency_SubscribeServer][]*protos.RateRquest
+	subscribers map[protos.Currency_SubscribeServer][]*protos.RateRequest
 }
 
 //NewCurrencyServer returns a Currency server instance
 func NewCurrencyServer(r *data.ExchangeRate, c *data.Currencies, l hclog.Logger) *Currency {
-	currency := &Currency{l, r, c, make(map[protos.Currency_SubscribeServer][]*protos.RateRquest)}
+	currency := &Currency{l, r, c, make(map[protos.Currency_SubscribeServer][]*protos.RateRequest)}
 
 	go currency.handleRatesUpdates()
 
@@ -28,7 +28,7 @@ func NewCurrencyServer(r *data.ExchangeRate, c *data.Currencies, l hclog.Logger)
 }
 
 //GetRate returns the current rate for the requested currency
-func (c *Currency) GetRate(ctx context.Context, rr *protos.RateRquest) (*protos.RateResponse, error) {
+func (c *Currency) GetRate(ctx context.Context, rr *protos.RateRequest) (*protos.RateResponse, error) {
 	c.log.Info("Handle GetRate", "base", rr.GetBase(), "destination", rr.GetDestination())
 	rate, err := c.rates.GetRate(rr.GetBase().String(), rr.GetDestination().String())
 	if err != nil {
@@ -63,7 +63,7 @@ func (c *Currency) Subscribe(src protos.Currency_SubscribeServer) error {
 		c.log.Info("Handling client request", "Base currency", rr.Base, "Destination currency", rr.Destination)
 		rrSub, isCached := c.subscribers[src]
 		if !isCached {
-			rrSub = []*protos.RateRquest{}
+			rrSub = []*protos.RateRequest{}
 		}
 		rrSub = append(rrSub, rr)
 		c.subscribers[src] = rrSub

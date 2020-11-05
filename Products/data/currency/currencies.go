@@ -19,6 +19,7 @@ func NewCurrencyDB(l hclog.Logger, cc protos.CurrencyClient) *CurrencyDB {
 	return &CurrencyDB{log: l, currencyClient: cc}
 }
 
+//GetCurrencies return all the available currencies from the currency server
 func (cdb *CurrencyDB) GetCurrencies() ([]string, error) {
 	cdb.log.Info("Getting all supported currencies")
 	cr := &protos.CurrenciesRequest{}
