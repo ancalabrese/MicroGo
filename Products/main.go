@@ -62,10 +62,6 @@ func main() {
 	cdb := cdata.NewCurrencyDB(l, cc)
 	ch := cHandler.NewCurrencyH(l, cdb)
 
-	err = pdb.SubscribeToRateChanges("GBP")
-	if err != nil {
-		l.Error("Couldn't subscribe to currency", "currency", "GBP", "error", err)
-	}
 	//main API router
 	r := mux.NewRouter()
 

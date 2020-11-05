@@ -154,12 +154,12 @@ func (p *ProductsDB) SubscribeToRateChanges(currencyCode string) error {
 		p.rateSubClient = sub
 	}
 
-	rr := &protos.RateRequest{
-		Base:        protos.Currencies(protos.Currencies_value[currencyCode]),
+	rr := &protos.RateRquest{
+		Base:        protos.Currencies(protos.Currencies_EUR),
 		Destination: protos.Currencies(protos.Currencies_value[currencyCode]),
 	}
 	err := p.rateSubClient.Send(rr)
-	if err == nil {
+	if err != nil {
 		p.log.Error("Failed to stream message to server", "error", err)
 		return err
 	}
@@ -197,9 +197,9 @@ func (p *ProductsDB) getRate(currency string) (float64, error) {
 	if c, isCached := p.rates[currency]; isCached {
 		return c, nil
 	}
-
-	rr := &protos.RateRequest{
-		Base:        protos.Currencies(protos.Currencies_value["EUR"]),
+	
+	rr := &protos.RateRquest{
+		Base:        protos.Currencies(protos.Currencies_value[currency]),
 		Destination: protos.Currencies(protos.Currencies_value[currency]),
 	}
 	response, err := p.currencyClient.GetRate(context.Background(), rr)
